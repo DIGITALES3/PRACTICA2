@@ -2,60 +2,62 @@
 			.MODEL SMALL
 			.STACK 100H
 			.DATA
-MAESTRA		DB 9 DUP (?), 20 DUP(?), 20 DUP(?), 2 DUP(?), 1 DUP(?), 1 DUP(?)
-			DB 9 DUP (?), 20 DUP(?), 20 DUP(?), 2 DUP(?), 1 DUP(?), 1 DUP(?)
-SALIDA		DB 53 DUP(?)
-			.CODE
+MAESTRA		DB 9 DUP (?), 20 DUP(?), 20 DUP(?), 2 DUP(?), 1 DUP(?), 1 DUP(?)		;Esto es un ejemplo de las tablas llenas
+			DB 9 DUP (?), 20 DUP(?), 20 DUP(?), 2 DUP(?), 1 DUP(?), 1 DUP(?)		;Esto es un ejemplo de las tablas llenas
+SALIDA		DB 53 DUP(?)															;Esto es un ejemplo de las tablas llenas
+			.CODE	
 INICIO		MOV AX,SEG MAESTRA
 			MOV DS,AX
 			MOV BX,00080H
 			MOV AL,ES:[BX]
 			CMP AL,03H
-			JE UNP
-			CMP AL,06H
-			JE DOSP
-			CMP AL,09H
-			JE TRESP
-			JNE MALO
-UNP:	MOV CX,40						;LLENAR LA TABLA EN FUNCION DE LA ELECCION
+			JE UNP					;UNP= UN PARAMETRO
+			CMP AL,06H				; ¿SI SERIA 06H, NO?
+			JE DOSP					;DOSP= DOS PARAMETROS
+			CMP AL,09H				; ¿SI SERIAN 09H, NO?
+			JE TRESP				; TRESP= TRES PARAMETROS
+			JNE MALO				;------LLENAR LA TABLA EN FUNCION DE LA ELECCION------
+UNP:	MOV CX,40						
 		MOV DX,00H
 		MOV BX,0082H
 		MOV AX,ES:[BX]			
 		CMP AX,"F/"
-		JE NO_F
+		JE ES_F
 		CMP AX,"f/"
-		JE NO_F
+		JE ES_F
 		CMP AX,"H/"
-		JE NO_H
+		JE ES_H
 		CMP AX,"h/"
-		JE NO_H
+		JE ES_H
 		CMP AX,"I/"
-		JE NO_I
+		JE ES_I
 		CMP AX,"i/"
-		JE NO_I
+		JE ES_I
 		CMP AX,"S/"
-		JE NO_S
+		JE ES_S
 		CMP AX,"s/"
-		JE NO_S
+		JE ES_S
 		CMP AX,"M/"
-		JE NO_M
+		JE ES_M
 		CMP AX,"m/"
-		JE NO_M
-		JMP MALO 
-NO_F:	MOV SI,OFFSET MAESTRA+52		;COMPROBAMOS SI LA FILA ES "F", PARA EN ESE CASO LLENAR 
+		JE ES_M
+		JMP MALO 			;--------COMPROBAMOS SI LA FILA ES "F", PARA EN ESE CASO LLENAR ------
+ES_F:	ADD SI,52			; Nos posicionamos en SEXO, creo que SI por defecto está en 0000H
 		MOV AL,DS:[SI]
 		CMP AL,"F"
-		JE LAZO1
+		JE NO				;NO= NO ORDEBADO
 		CMP AL,"f"
-		JE LAZO1
-		JMP NOES
-		LOOP NO_F	
-LAZO1:	MOV SI,OFFSET MAESTRA+DX
-		MOV DI,OFFSET SALIDA+DX
-		MOV CX,53		
+		JE NO
+		ADD SI,02
+		LOOP ES_F	
+NO:		MOV DX,53
+		DEC SI,50	
 LLENAR:	MOV AL,DS:[SI] 		
-		MOV DS:[DI],AL
+		MOV DS:[BX],AL
 		INC SI,
-		INC DI
+		INC BX
+		DEC DX
+		JZF ----> 		; BUSCAR SALTO QUE HAGA QUE CUANDO DX SEA 0 TERMINE EL CONTADOR Y SALGA A JMP ES_F
 		LOOP LLENAR
+		JMP ES_F
 		
